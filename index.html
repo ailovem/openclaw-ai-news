@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI资讯 - 全球智能情报中心</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --primary: #2563eb;
+      --accent: #06b6d4;
+      --dark: #0f172a;
+      --card: #1e293b;
+      --card-hover: #334155;
+      --text: #f8fafc;
+      --text-sec: #94a3b8;
+      --star-5: #dc2626;
+      --star-4: #f59e0b;
+      --star-3: #10b981;
+      --star-2: #6366f1;
+      --star-1: #6b7280;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 64px;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid #334155;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      z-index: 1000;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    .brand-name { font-size: 18px; font-weight: 600; }
+    .brand-name span { color: var(--primary); }
+    .stats { display: flex; gap: 24px; }
+    .stat { text-align: center; }
+    .stat-value { font-size: 20px; font-weight: 700; color: var(--accent); }
+    .stat-label { font-size: 10px; color: var(--text-sec); }
+    .refresh-btn {
+      padding: 8px 16px;
+      border: 1px solid var(--primary);
+      border-radius: 6px;
+      background: transparent;
+      color: var(--primary);
+      cursor: pointer;
+      font-size: 13px;
+      transition: 0.2s;
+    }
+    .refresh-btn:hover { background: var(--primary); color: white; }
+    .main { padding-top: 88px; max-width: 1100px; margin: 0 auto; padding: 88px 24px 48px; }
+    .filters {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding: 16px 20px;
+      background: var(--card);
+      border-radius: 10px;
+      flex-wrap: wrap;
+    }
+    .filter-label { font-size: 12px; color: var(--text-sec); margin-right: 8px; }
+    .filter-btn {
+      padding: 5px 12px;
+      border: 1px solid #334155;
+      border-radius: 5px;
+      background: transparent;
+      color: var(--text-sec);
+      cursor: pointer;
+      font-size: 12px;
+      transition: 0.2s;
+    }
+    .filter-btn:hover { background: var(--card-hover); }
+    .filter-btn.active { background: var(--primary); border-color: var(--primary); color: white; }
+    .star-btns { display: flex; gap: 4px; }
+    .star-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 4px;
+      border: 2px solid #334155;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+    .star-btn[data-s="5"] { border-color: var(--star-5); color: var(--star-5); }
+    .star-btn[data-s="4"] { border-color: var(--star-4); color: var(--star-4); }
+    .star-btn[data-s="3"] { border-color: var(--star-3); color: var(--star-3); }
+    .star-btn[data-s="2"] { border-color: var(--star-2); color: var(--star-2); }
+    .star-btn[data-s="1"] { border-color: var(--star-1); color: var(--star-1); }
+    .star-btn:hover, .star-btn.active { color: white; }
+    .star-btn[data-s="5"].active { background: var(--star-5); border-color: var(--star-5); }
+    .star-btn[data-s="4"].active { background: var(--star-4); border-color: var(--star-4); }
+    .star-btn[data-s="3"].active { background: var(--star-3); border-color: var(--star-3); }
+    .star-btn[data-s="2"].active { background: var(--star-2); border-color: var(--star-2); }
+    .star-btn[data-s="1"].active { background: var(--star-1); border-color: var(--star-1); }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .title { font-size: 24px; font-weight: 700; }
+    .live {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #10b981;
+      background: rgba(16, 185, 129, 0.1);
+      padding: 3px 8px;
+      border-radius: 12px;
+      margin-left: 10px;
+    }
+    .live-dot { width: 5px; height: 5px; border-radius: 50%; background: #10b981; animation: p 2s infinite; }
+    @keyframes p { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .update { font-size: 11px; color: var(--text-sec); }
+    .news-list { display: flex; flex-direction: column; gap: 12px; }
+    .news-card {
+      background: var(--card);
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 16px 20px;
+      display: flex;
+      gap: 16px;
+      transition: 0.2s;
+    }
+    .news-card:hover { border-color: var(--primary); background: var(--card-hover); }
+    .star-box { width: 44px; text-align: center; flex-shrink: 0; }
+    .star-num {
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+      color: white;
+    }
+    .star-num.s5 { background: var(--star-5); }
+    .star-num.s4 { background: var(--star-4); }
+    .star-num.s3 { background: var(--star-3); }
+    .star-num.s2 { background: var(--star-2); }
+    .star-num.s1 { background: var(--star-1); }
+    .star-score { font-size: 10px; color: var(--text-sec); margin-top: 4px; }
+    .content { flex: 1; min-width: 0; }
+    .news-title { font-size: 15px; font-weight: 600; margin-bottom: 8px; line-height: 1.4; }
+    .news-title a { color: var(--text); text-decoration: none; transition: 0.2s; }
+    .news-title a:hover { color: var(--primary); }
+    .meta { display: flex; flex-wrap: wrap; gap: 10px; font-size: 11px; color: var(--text-sec); margin-bottom: 8px; }
+    .meta span { display: inline-flex; align-items: center; gap: 4px; }
+    .source { padding: 2px 8px; border-radius: 3px; font-size: 10px; background: rgba(37, 99, 235, 0.15); color: #60a5fa; }
+    .lang { padding: 2px 6px; border-radius: 3px; font-size: 10px; }
+    .lang.cn { background: rgba(220, 38, 38, 0.15); color: #f87171; }
+    .lang.en { background: rgba(6, 182, 212, 0.15); color: var(--accent); }
+    .snippet { font-size: 13px; color: var(--text-sec); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .tags { display: flex; gap: 6px; margin-top: 10px; }
+    .tag { padding: 3px 8px; border-radius: 3px; font-size: 10px; background: rgba(255,255,255,0.05); color: var(--text-sec); }
+    .tag.cat { background: rgba(6, 182, 212, 0.1); color: var(--accent); }
+    .empty { text-align: center; padding: 60px 20px; color: var(--text-sec); }
+    .load { display: flex; flex-direction: column; align-items: center; padding: 60px; }
+    .spin { width: 32px; height: 32px; border: 3px solid #334155; border-top-color: var(--primary); border-radius: 50%; animation: s 1s linear infinite; }
+    @keyframes s { to{transform:rotate(360deg)} }
+    @media (max-width: 700px) {
+      .navbar { padding: 0 16px; flex-wrap: wrap; height: auto; padding: 10px 16px; gap: 10px; }
+      .stats { display: none; }
+      .main { padding: 100px 12px 32px; }
+      .news-card { flex-direction: column; padding: 14px; }
+      .star-box { flex-direction: row; width: auto; gap: 10px; margin-bottom: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="brand">
+      <div class="brand-icon">AI</div>
+      <div class="brand-name"><span>AI</span> 资讯</div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="stat-value" id="total">0</div><div class="stat-label">文章</div></div>
+      <div class="stat"><div class="stat-value" id="star5">0</div><div class="stat-label">重大</div></div>
+      <div class="stat"><div class="stat-value" id="sources">0</div><div class="stat-label">来源</div></div>
+    </div>
+    <button class="refresh-btn" onclick="load()">刷新</button>
+  </nav>
+  <main class="main">
+    <div class="filters">
+      <div>
+        <span class="filter-label">级别:</span>
+        <div class="star-btns">
+          <button class="star-btn active" data-s="all" onclick="f('star','')">全部</button>
+          <button class="star-btn" data-s="5" onclick="f('star','5')">5</button>
+          <button class="star-btn" data-s="4" onclick="f('star','4')">4</button>
+          <button class="star-btn" data-s="3" onclick="f('star','3')">3</button>
+          <button class="star-btn" data-s="2" onclick="f('star','2')">2</button>
+        </div>
+      </div>
+      <div>
+        <span class="filter-label">语言:</span>
+        <button class="filter-btn active" data-l="all" onclick="f('lang','')">全部</button>
+        <button class="filter-btn" data-l="zh" onclick="f('lang','zh')">中文</button>
+        <button class="filter-btn" data-l="en" onclick="f('lang','en')">英文</button>
+      </div>
+    </div>
+    <div class="header">
+      <h1 class="title">全球AI智能情报 <span class="live"><span class="live-dot"></span> 实时</span></h1>
+      <span class="update" id="up">加载中...</span>
+    </div>
+    <div class="news-list" id="list">
+      <div class="load">
+        <div class="spin"></div>
+        <p style="margin-top:12px;color:var(--text-sec)">正在获取全球AI资讯...</p>
+      </div>
+    </div>
+  </main>
+  <script>
+    const API = 'https://api.allorigins.win/raw?url=' + encodeURIComponent('http://localhost:3001/api/news');
+    let all = [];
+    let fts = { star: '', lang: '' };
+    
+    async function load() {
+      const btn = document.querySelector('.refresh-btn');
+      btn.textContent = '刷新中...';
+      try {
+        const r = await fetch(API);
+        const d = await r.json();
+        all = d.news || [];
+        document.getElementById('total').textContent = d.count || 0;
+        document.getElementById('star5').textContent = all.filter(n => n.star === 5).length;
+        document.getElementById('sources').textContent = [...new Set(all.map(n => n.source))].length;
+        document.getElementById('up').textContent = '更新: ' + new Date().toLocaleTimeString();
+        render();
+      } catch (e) {
+        document.getElementById('list').innerHTML = '<div class="empty">加载失败，请确保新闻服务在 localhost:3001 运行中</div>';
+      }
+      btn.textContent = '刷新';
+    }
+    
+    function render() {
+      let n = all;
+      if (fts.star) n = n.filter(x => x.star === parseInt(fts.star));
+      if (fts.lang) n = n.filter(x => x.language === fts.lang);
+      
+      const c = document.getElementById('list');
+      if (!n.length) {
+        c.innerHTML = '<div class="empty">暂无相关内容</div>';
+        return;
+      }
+      c.innerHTML = n.map(i => `
+        <div class="news-card">
+          <div class="star-box">
+            <div class="star-num s${i.star}">${i.star}</div>
+            <div class="star-score">${i.score}分</div>
+          </div>
+          <div class="content">
+            <h3 class="news-title"><a href="${i.link}" target="_blank">${esc(i.title)}</a></h3>
+            <div class="meta">
+              <span class="source">${i.source}</span>
+              <span class="lang ${i.language}">${i.language === 'zh' ? '中文' : '英文'}</span>
+              <span>${i.timeAgo}</span>
+              <span>权威:${i.sourceAuthority}%</span>
+            </div>
+            <p class="snippet">${esc(i.contentSnippet || '暂无摘要')}</p>
+            <div class="tags">
+              <span class="tag cat">${i.category}</span>
+              <span class="tag">${i.star}星</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    function f(k, v) {
+      fts[k] = v;
+      document.querySelectorAll('[data-' + k + ']').forEach(b => b.classList.toggle('active', b.dataset[k] === (v || 'all')));
+      render();
+    }
+    
+    function esc(t) {
+      const d = document.createElement('div');
+      d.textContent = t;
+      return d.innerHTML;
+    }
+    
+    load();
+    setInterval(load, 300000);
+  </script>
+</body>
+</html>
